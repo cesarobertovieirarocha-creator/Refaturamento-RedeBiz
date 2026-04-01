@@ -1,0 +1,2090 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estudo Refaturamento NF - Dashboard Executivo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { fontFamily: { 'sans': ['Inter', 'sans-serif'] } } }
+        }
+    </script>
+</head>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // ===============================
+    // 🎨 CONFIG GLOBAL CHART.JS
+    // ===============================
+    Chart.defaults.color = '#9CA3AF';
+    Chart.defaults.borderColor = 'rgba(75,85,99,0.3)';
+    Chart.defaults.font.family = 'Inter';
+    
+    // ===============================
+    // 🚀 INICIALIZAÇÃO
+    // ===============================
+    initAll();
+    
+    // ===============================
+    // 🎯 FUNCIONALIDADES
+    // ===============================
+    initNavigation();
+    initButtons();
+    initAnimations();
+    initCharts();
+    initDynamicContent();
+});
+
+// ===============================
+/* 🚀 INICIALIZAÇÃO PRINCIPAL */
+// ===============================
+function initAll() {
+    console.log('🚀 Dashboard carregado com sucesso!');
+}
+
+// ===============================
+/* 📈 TODOS OS GRÁFICOS */
+// ===============================
+function initCharts() {
+    initRefaturamentoChart();
+    initDistribuicaoChart();
+}
+
+let refaturamentoChartInstance = null;
+
+function initRefaturamentoChart() {
+    const ctx = document.getElementById('refaturamentoChart');
+    if (!ctx) return;
+
+    // Evita duplicação do gráfico
+    if (refaturamentoChartInstance) {
+        refaturamentoChartInstance.destroy();
+    }
+
+    refaturamentoChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Out/25', 'Nov/25', 'Dez/25', 'Jan/26', 'Fev/26', 'Mar/26'],
+            datasets: [{
+                label: 'Refaturamentos',
+                data: [34, 18, 3, 23, 11, 16],
+                tension: 0.4,
+                fill: true,
+                borderWidth: 4,
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                pointBackgroundColor: '#A855F7',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                borderColor: '#fb923c',
+                backgroundColor: function(context) {
+                    const chart = context.chart;
+                    const { ctx, chartArea } = chart;
+
+                    if (!chartArea) return;
+
+                    const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                    gradient.addColorStop(0, 'rgba(168,85,247,0.4)');
+                    gradient.addColorStop(1, 'rgba(168,85,247,0.02)');
+                    return gradient;
+                }
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+
+            animation: {
+                duration: 1200,
+                easing: 'easeOutQuart'
+            },
+
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: (context) => ` ${context.dataset.label}: ${context.raw}`
+                    }
+                },
+                legend: {
+                    display: true,
+                    labels: {
+                        color: '#374151',
+                        font: {
+                            size: 12
+                        }
+                    }
+                }
+            },
+
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 5
+                    },
+                    grid: {
+                        color: 'rgba(75,85,99,0.1)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+}
+
+// ===============================
+/* 📊 GRÁFICO DISTRIBUIÇÃO */
+// ===============================
+function initDistribuicaoChart() {
+    const ctx = document.getElementById('distribuicaoChart');
+    if (!ctx) return;
+
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Pedido incorreto', 'Cadastro errado', 'Condição pagamento'],
+            datasets: [{
+                data: [50, 30, 20],
+                borderWidth: 3,
+                borderColor: '#1f2937',
+                hoverOffset: 10,
+                backgroundColor: [
+                    '#ef4444',
+                    '#f97316', 
+                    '#eab308'
+                ],
+                hoverBackgroundColor: [
+                    '#dc2626',
+                    '#ea580c',
+                    '#ca8a04'
+                ]
+            }]
+        },
+        options: getChartOptions({
+            cutout: '65%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 25,
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        font: { size: 13 }
+                    }
+                }
+            }
+        })
+    });
+}
+
+let stackedBarChartInstance = null;
+
+function initStackedBarChart() {
+    const ctx = document.getElementById('stackedBarChart');
+    if (!ctx) {
+        console.warn('Canvas stackedBarChart não encontrado');
+        return;
+    }
+
+    // Evita duplicação
+    if (stackedBarChartInstance) {
+        stackedBarChartInstance.destroy();
+    }
+
+    const meses = ['Out/25', 'Nov/25', 'Dez/25', 'Jan/26', 'Fev/26', 'Mar/26'];
+    const fornecedores = ['Vestacy', 'Reckitt', 'Nivea', 'Cargill', 'Bic'];
+
+    const dataRefaturamento = {
+        Vestacy: [2, 1, 0, 1, 0, 2],
+        Reckitt: [4, 1, 2, 1, 0, 1],
+        Nivea: [13, 1, 1, 10, 11, 11],
+        Cargill: [5, 4, 0, 2, 0, 1],
+        Bic: [0, 0, 0, 9, 0, 1]
+    };
+
+    function getDynamicColors(values) {
+        return values.map(v => {
+            if (v >= 10) return '#ef4444';  // crítico
+            if (v >= 5) return '#f97316';   // alto
+            if (v >= 2) return '#eab308';   // médio
+            return '#10b981';               // baixo
+        });
+    }
+
+    const datasets = fornecedores.map((fornecedor) => {
+        const values = dataRefaturamento[fornecedor]; // ✅ CORRETO
+        const colors = getDynamicColors(values);
+
+        return {
+            label: fornecedor,
+            data: values,
+            backgroundColor: colors,
+            borderColor: colors.map(c => c + 'CC'),
+            borderWidth: 1,
+            borderRadius: 6,
+            hoverBackgroundColor: colors.map(c => c + 'FF')
+        };
+    });
+
+    stackedBarChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: meses,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+
+            animation: {
+                duration: 1500,
+                easing: 'easeOutQuart'
+            },
+
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        color: '#9CA3AF',
+                        font: {
+                            size: 12,
+                            family: 'Inter'
+                        }
+                    }
+                },
+
+                tooltip: {
+                    backgroundColor: 'rgba(17,24,39,0.95)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#9CA3AF',
+                    borderColor: '#fbbf24',
+                    borderWidth: 2,
+                    cornerRadius: 12,
+                    padding: 16,
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ${context.raw}`;
+                        },
+                        footer: function(tooltipItems) {
+                            const total = tooltipItems.reduce((sum, item) => sum + item.raw, 0);
+                            return `Total: ${total}`;
+                        }
+                    }
+                }
+            },
+
+            scales: {
+                x: {
+                    stacked: true,
+                    grid: { display: false },
+                    ticks: { color: '#9CA3AF' }
+                },
+                y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 5,
+                        color: '#9CA3AF'
+                    },
+                    grid: {
+                        color: 'rgba(75,85,99,0.1)'
+                    }
+                }
+            }
+        }
+    });
+}
+
+// ===============================
+/* INIT - CHAMAR NO initCharts() */
+// ===============================
+function initCharts() {
+    initRefaturamentoChart();
+    initDistribuicaoChart();
+    initStackedBarChart();  // ← NOVO!
+    initEmailCards();       // ← NOVO!
+}
+// ===============================
+// 📧 Cards de E-mails Enviados
+// ===============================
+const emailsEnviados = [8,3,2,5,1,3]; // out-25 → mar-26
+const totalEmails = emailsEnviados.reduce((a,b)=>a+b,0);
+document.getElementById('totalEmails').innerText = totalEmails;
+
+const maxEmails = Math.max(...emailsEnviados);
+const minEmails = Math.min(...emailsEnviados);
+
+document.getElementById('mesMais').innerText = `${meses[emailsEnviados.indexOf(maxEmails)]} (${maxEmails})`;
+document.getElementById('mesMenos').innerText = `${meses[emailsEnviados.indexOf(minEmails)]} (${minEmails})`;
+
+// ===============================
+/* 📊 STACKED BAR - DADOS REAIS 100% PRECISOS */
+// ===============================
+function initStackedBarReal() {
+    const ctx = document.getElementById('stackedBarReal');
+    if (!ctx) return console.warn('Canvas stackedBarReal não encontrado');
+
+    // SEUS DADOS EXATOS PROCESSADOS
+    const meses = ['Out/25', 'Nov/25', 'Dez/25', 'Jan/26', 'Fev/26', 'Mar/26'];
+    
+    const dados = {
+        'Nivea 🚨': [13, 0, 1, 10, 11, 11],
+        'Cargill': [5, 4, 0, 2, 0, 1],
+        'Bic': [0, 0, 0, 9, 0, 1],
+        'Reckitt Core': [4, 1, 2, 1, 0, 1],
+        'Vestacy': [2, 1, 0, 1, 0, 2],
+        'Rayovac': [4, 0, 0, 0, 0, 0],
+        'Hypera': [3, 0, 0, 0, 0, 0],
+        'Outros': [3, 0, 0, 0, 0, 0]
+    };
+
+    // CORES GRADIENTES POR FORNECEDOR
+    const cores = {
+        'Nivea 🚨': '#ef4444',
+        'Cargill': '#f97316', 
+        'Bic': '#eab308',
+        'Reckitt Core': '#10b981',
+        'Vestacy': '#3b82f6',
+        'Rayovac': '#8b5cf6',
+        'Hypera': '#f59e0b',
+        'Outros': '#6b7280'
+    };
+
+    const datasets = Object.entries(dados).map(([label, data]) => ({
+        label: label,
+        data: data,
+        backgroundColor: data.map(() => cores[label] + 'CC'), // 80% opacity
+        borderColor: cores[label] + 'FF',
+        borderWidth: 1.5,
+        borderRadius: 6,
+        hoverBackgroundColor: cores[label] + 'FF'
+    }));
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: meses,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    align: 'start',
+                    labels: {
+                        boxWidth: 12,
+                        padding: 20,
+                        usePointStyle: true,
+                        font: { size: 12, family: 'Inter' },
+                        color: '#9CA3AF'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(17,24,39,0.98)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#fbbf24',
+                    borderColor: '#fbbf24',
+                    borderWidth: 2,
+                    cornerRadius: 12,
+                    padding: 16,
+                    displayColors: true,
+                    callbacks: {
+                        title: (ctx) => `📅 ${ctx[0].label}`,
+                        label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y} NF`
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    stacked: true,
+                    grid: { display: false },
+                    ticks: { 
+                        color: '#9CA3AF',
+                        maxRotation: 0
+                    }
+                },
+                y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    max: 35,
+                    ticks: { 
+                        stepSize: 5,
+                        color: '#9CA3AF'
+                    },
+                    grid: { 
+                        color: (ctx) => ctx.tick.value === 0 ? 'transparent' : 'rgba(75,85,99,0.15)'
+                    }
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            animation: {
+                duration: 2500,
+                easing: 'easeOutBounce'
+            }
+        }
+    });
+    
+    console.log('✅ Stacked Bar carregado: 93 NF | Nivea 49%');
+}
+
+// CHAME NO initCharts():
+// initStackedBarReal();
+
+// ===============================
+// 📊 STACKED BAR REAL - FORNECEDORES
+// ===============================
+let stackedBarRealInstance = null;
+
+function initStackedBarRealChart() {
+    const ctx = document.getElementById('stackedBarReal');
+    if (!ctx) return;
+
+    // Destrói gráfico anterior se já existir
+    if (stackedBarRealInstance) stackedBarRealInstance.destroy();
+
+    const meses = ['Out/25', 'Nov/25', 'Dez/25', 'Jan/26', 'Fev/26', 'Mar/26'];
+    const fornecedores = ['Nivea', 'Cargill', 'Bic'];
+
+    const data = {
+        Nivea: [13, 1, 1, 10, 11, 11],
+        Cargill: [5, 4, 0, 2, 0, 1],
+        Bic: [0, 0, 0, 9, 0, 1]
+    };
+
+    function getColor(v) {
+        if (v >= 10) return '#ef4444'; // vermelho
+        if (v >= 5) return '#f97316';  // laranja
+        if (v >= 2) return '#eab308';  // amarelo
+        return '#10b981';              // verde
+    }
+
+    const datasets = fornecedores.map(f => {
+        const values = data[f];
+        return {
+            label: f,
+            data: values,
+            backgroundColor: values.map(getColor),
+            borderRadius: 6,
+            borderWidth: 1
+        };
+    });
+
+    stackedBarRealInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: meses,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: { color: '#D1D5DB' }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(17,24,39,0.95)',
+                    titleColor: '#fff',
+                    bodyColor: '#D1D5DB',
+                    borderColor: '#fbbf24',
+                    borderWidth: 2,
+                    cornerRadius: 10,
+                    padding: 12,
+                    callbacks: {
+                        label: ctx => `${ctx.dataset.label}: ${ctx.raw}`,
+                        footer: items => {
+                            const total = items.reduce((sum, i) => sum + i.raw, 0);
+                            return `Total: ${total}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { stacked: true, grid: { display: false }, ticks: { color: '#D1D5DB' } },
+                y: { stacked: true, beginAtZero: true, ticks: { stepSize: 5, color: '#D1D5DB' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+            }
+        }
+    });
+}
+
+// Inicializa quando o DOM estiver pronto
+document.addEventListener('DOMContentLoaded', () => {
+    initStackedBarRealChart();
+});
+
+// ===============================
+/* ⚙️ OPÇÕES PADRÃO CHARTS */
+// ===============================
+function getChartOptions(custom = {}) {
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+            duration: 1500,
+            easing: 'easeOutQuart'
+        },
+        plugins: {
+            legend: {
+                display: false,
+                ...custom.plugins
+            },
+            tooltip: {
+                backgroundColor: 'rgba(17,24,39,0.95)',
+                titleColor: '#ffffff',
+                bodyColor: '#9CA3AF',
+                borderColor: '#fb923c',
+                borderWidth: 1,
+                cornerRadius: 12,
+                padding: 12,
+                displayColors: true
+            }
+        },
+        interaction: {
+            intersect: false,
+            mode: 'index'
+        },
+        ...custom
+    };
+}
+
+// ===============================
+/* 🧭 NAVEGAÇÃO ATIVA + SMOOTH */
+// ===============================
+function initNavigation() {
+    // Smooth scroll para todos os links
+    document.querySelectorAll('a[href^="#"]').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = link.getAttribute('href').substring(1);
+            const target = document.getElementById(targetId);
+            
+            if (target) {
+                target.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+                
+                // Ativa o link na sidebar
+                setActiveNavLink(targetId);
+            }
+        });
+    });
+    
+    // Navbar ativa no scroll
+    window.addEventListener('scroll', updateActiveNav);
+    updateActiveNav();
+}
+
+function updateActiveNav() {
+    const sections = ['visao-geral', 'problema', 'analise', 'solucoes', 'projecoes', 'foco-nivea', 'top-contas'];
+    const scrollY = window.scrollY + 100;
+    
+    sections.forEach(id => {
+        const section = document.getElementById(id);
+        const navLink = document.querySelector(`a[href="#${id}"]`);
+        
+        if (section && section.offsetTop <= scrollY && scrollY < section.offsetTop + section.offsetHeight) {
+            setActiveNavLink(id);
+        }
+    });
+}
+
+function setActiveNavLink(activeId) {
+    // Remove classe ativa de todos
+    document.querySelectorAll('.active-nav').forEach(link => {
+        link.classList.remove('active-nav');
+    });
+    
+    // Adiciona na ativa
+    const activeLink = document.querySelector(`a[href="#${activeId}"]`);
+    if (activeLink) {
+        activeLink.classList.add('active-nav');
+    }
+}
+
+// ===============================
+/* 🔘 BOTÕES FUNCIONAIS */
+// ===============================
+function initButtons() {
+    // PDF/Print
+    const pdfBtn = document.querySelector('button:has(i.fa-file-pdf)');
+    if (pdfBtn) {
+        pdfBtn.addEventListener('click', () => {
+            window.print();
+            showToast('📄 Imprimindo relatório...', 'success');
+        });
+    }
+    
+    // Fullscreen
+    const fullscreenBtn = document.querySelector('button:has(i.fa-expand)');
+    if (fullscreenBtn) {
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+    }
+    
+    // LinkedIn
+    const linkedinBtn = document.querySelector('a[href*="linkedin"]');
+    if (linkedinBtn) {
+        linkedinBtn.addEventListener('click', () => {
+            showToast('🔗 Abrindo LinkedIn...', 'info');
+        });
+    }
+    
+    // Sistema Nivea
+    const niveaBtn = document.querySelector('a[href*="streamlit"]');
+    if (niveaBtn) {
+        niveaBtn.addEventListener('click', () => {
+            showToast('🚀 Abrindo Simulador Nivea...', 'success');
+        });
+    }
+}
+
+function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen?.() || 
+        document.documentElement.webkitRequestFullscreen?.();
+        showToast('📱 Modo tela cheia ativado', 'success');
+    } else {
+        document.exitFullscreen?.() || 
+        document.webkitExitFullscreen?.();
+        showToast('📱 Modo tela cheia desativado', 'info');
+    }
+}
+
+// ===============================
+/* ✨ ANIMAÇÕES DE ENTRADA */
+// ===============================
+function initAnimations() {
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-fadeInUp');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+    
+    // Observa todos os cards e seções
+    document.querySelectorAll('.card, .bg-gray-800, .bg-red-500\\/10, section, [id]').forEach(el => {
+        observer.observe(el);
+    });
+}
+
+// ===============================
+/* 📱 CONTEÚDO DINÂMICO */
+// ===============================
+function initDynamicContent() {
+    // Atualiza KPIs dinamicamente
+    updateKPIs();
+    
+    // Scroll indicator
+    window.addEventListener('scroll', updateScrollIndicator);
+}
+
+// Atualiza KPIs com cálculos
+function updateKPIs() {
+    const data = [34, 18, 3, 23, 11, 16];
+    const total = data.reduce((a, b) => a + b, 0);
+    const media = (total / data.length).toFixed(1);
+    const pior = Math.max(...data);
+    const melhor = Math.min(...data);
+    
+    // Atualiza no DOM se existir
+    const totalEl = document.querySelector('h4:has(text("93 NF"))');
+    const mediaEl = document.querySelector('h4:has(text("15,5 NF"))');
+    const piorEl = document.querySelector('h4:has(text("34"))');
+    const melhorEl = document.querySelector('h4:has(text("3"))');
+    
+    if (totalEl) totalEl.textContent = `${total} NF`;
+    if (mediaEl) mediaEl.textContent = `${media} NF`;
+    if (piorEl) piorEl.textContent = `${pior}`;
+    if (melhorEl) melhorEl.textContent = `${melhor}`;
+}
+
+// Scroll indicator
+function updateScrollIndicator() {
+    const scrollTop = window.scrollY;
+    const docHeight = document.body.scrollHeight - window.innerHeight;
+    const scrollPercent = (scrollTop / docHeight) * 100;
+    
+    const indicator = document.querySelector('.scroll-indicator');
+    if (indicator) {
+        indicator.style.width = `${scrollPercent}%`;
+    }
+}
+
+// ===============================
+/* 🔔 TOAST NOTIFICAÇÕES */
+// ===============================
+function showToast(message, type = 'info') {
+    // Remove toast anterior
+    const oldToast = document.querySelector('.toast');
+    if (oldToast) oldToast.remove();
+    
+    // Cria novo toast
+    const toast = document.createElement('div');
+    toast.className = `toast fixed top-6 right-6 z-[9999] p-4 rounded-2xl shadow-2xl text-sm font-medium transform translate-x-full transition-all duration-300 backdrop-blur-md border`;
+    
+    const colors = {
+        success: 'bg-green-500/90 border-green-400 text-white',
+        error: 'bg-red-500/90 border-red-400 text-white',
+        info: 'bg-blue-500/90 border-blue-400 text-white',
+        warning: 'bg-orange-500/90 border-orange-400 text-white'
+    };
+    
+    toast.classList.add(colors[type] || colors.info);
+    toast.textContent = message;
+    
+    document.body.appendChild(toast);
+    
+    // Anima entrada
+    setTimeout(() => toast.classList.remove('translate-x-full'), 100);
+    
+    // Remove após 3s
+    setTimeout(() => {
+        toast.classList.add('translate-x-full');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// ===============================
+/* 📱 RESPONSIVO PERFEITO */
+// ===============================
+function initResponsive() {
+    // Sidebar mobile
+    const sidebar = document.querySelector('.fixed.inset-y-0.left-0');
+    const menuBtn = document.querySelector('.mobile-menu-btn');
+    
+    if (window.innerWidth < 768) {
+        // Adiciona overlay mobile
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 bg-black/50 z-40 md:hidden';
+        overlay.id = 'sidebar-overlay';
+        document.body.appendChild(overlay);
+        
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('translate-x-0');
+            overlay.classList.add('hidden');
+        });
+    }
+}
+
+// ===============================
+/* 🔄 PERFOMANCE + ERROS */
+// ===============================
+window.addEventListener('error', (e) => {
+    console.error('❌ Erro:', e.error);
+    showToast('⚠️ Erro detectado. Recarregue a página.', 'error');
+});
+
+window.addEventListener('resize', () => {
+    // Reajusta charts em resize
+    window.dispatchEvent(new Event('chartResize'));
+});
+
+// Polyfill para navegadores antigos
+if (!Element.prototype.matches) {
+    Element.prototype.matches = Element.prototype.msMatchesSelector || 
+                              Element.prototype.webkitMatchesSelector;
+}
+</script>
+
+<body class="bg-gradient-to-br from-[#0B0B0F] via-[#111118] to-[#0B0B0F] min-h-screen text-[#E4E4E7]">
+    
+    <!-- Sidebar -->
+    <div class="fixed inset-y-0 left-0 z-50 w-72 bg-[#111118]/80 backdrop-blur-xl border-r border-white/5 shadow-2xl flex flex-col">
+        
+        <div class="p-6 flex flex-col h-full">
+            
+            <!-- TOPO (Logo + Menu) -->
+            <div>
+                <div class="flex items-center space-x-3 mb-8">
+                    <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-red-500 rounded-2xl flex items-center justify-center">
+                        <i class="fas fa-file-invoice-dollar text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold bg-gradient-to-r from-purple-400 to-fuchsia-500 bg-clip-text text-transparent">
+                            Estudo Refaturamento NF
+                        </h1>
+                        <p class="text-xs text-gray-400 mt-1">Rede Biz</p>
+                    </div>
+                </div>
+                
+                <nav class="space-y-2">
+                    <a href="#visao-geral" class="flex items-center space-x-3 p-3 rounded-xl bg-purple-500/10 border border-purple-500/20 hover:bg-purple-500/20 transition-all duration-200 active-nav">
+                        <i class="fas fa-chart-line text-purple-400"></i>
+                        <span class="font-medium">Visão Geral (6 meses)</span>
+                    </a>
+                    <a href="#problema" class="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/5 transition-all duration-200">
+                        <i class="fas fa-exclamation-triangle text-purple-400"></i>
+                        <span>Problema Identificado</span>
+                    </a>
+                    <a href="#analise" class="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/5 transition-all duration-200">
+                        <i class="fas fa-search text-purple-400"></i>
+                        <span>Análise Detalhada</span>
+                    </a>
+                    <a href="#solucoes" class="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/5 transition-all duration-200">
+                        <i class="fas fa-lightbulb text-purple-400"></i>
+                        <span>Soluções Propostas</span>
+                    </a>
+                    <a href="#projecoes" class="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/5 transition-all duration-200">
+                        <i class="fas fa-chart-area text-purple-400"></i>
+                        <span>Projeções</span>
+                    </a>
+                </nav>
+            </div>
+
+            <!-- RODAPÉ (Sobre mim FIXO) -->
+            <div class="mt-auto pt-6 border-t border-gray-800/50">
+                <div class="bg-[#111118]/60 backdrop-blur-md border 60 border-white/5 rounded-2xl p-6 flex flex-col items-center text-center shadow-2xl hover:shadow-purple-500/10 transition-all duration-300 group">
+                    
+                    <!-- FOTO -->
+                    <div class="w-20 h-20 rounded-full overflow-hidden border-4 border-purple-500/50 group-hover:border-orange-500/80 mb-4 ring-4 ring-transparent group-hover:ring-orange-500/20 transition-all duration-300">
+                        <img src="Imagens/Cesar Roberto.jpeg" alt="César Roberto" 
+                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                    </div>
+
+                    <!-- NOME -->
+                    <h4 class="text-white font-bold text-lg tracking-wide mb-2 bg-gradient-to-r from-white to-orange-200 bg-clip-text text-transparent group-hover:from-purple-400 group-hover:to-red-400 transition-all">
+                        César Roberto
+                    </h4>
+
+                    <!-- DESCRIÇÃO -->
+                    <p class="text-gray-400 text-xs leading-relaxed mb-4 px-2 max-w-[200px]">
+                        Especialista em processos operacionais<br>
+                        e análise de refaturamento.
+                    </p>
+
+                    <!-- LINKEDIN -->
+                    <a href="https://www.linkedin.com/in/cesar-colins" target="_blank" 
+                       class="flex items-center space-x-2 text-purple-400 hover:text-purple-300 text-sm font-semibold transition-all duration-200 hover:scale-105 hover:-translate-y-0.5">
+                        <i class="fab fa-linkedin-in text-lg"></i>
+                        <span>Conecte-se no LinkedIn</span>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+
+    <!-- Main Content -->
+    <div class="ml-72 p-8 w-full max-w-[1400px]">
+        <!-- Header -->
+<div class="flex justify-between items-center mb-16">
+
+    <!-- Título e subtítulo -->
+    <div>
+        <h2 class="text-4xl font-bold bg-gradient-to-r from-purple-400 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
+            Estudo Refaturamento de NF
+        </h2>
+        <p class="text-gray-300 mt-2 text-lg">Análise dos últimos 6 meses</p>
+    </div>
+
+    <!-- Logos no lugar dos botões -->
+    <div class="flex items-center space-x-4">
+        <div class="bg-gray-800/50 p-2 rounded-2xl border border-gray-700 flex items-center justify-center hover:scale-105 transition-transform">
+            <img src="Imagens/Biz Distribuidora.png" alt="Logo 1" class="h-12 object-contain">
+        </div>
+    </div>
+
+</div>
+
+        <div class="mb-16">
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+        <div class="bg-gray-800/50 p-6 rounded-2xl border border-gray-700">
+            <p class="text-gray-400 text-sm">Total</p>
+            <h4 class="text-2xl font-bold mt-2">93 NF</h4>
+        </div>
+        <div class="bg-gray-800/50 p-6 rounded-2xl border border-gray-700">
+            <p class="text-gray-400 text-sm">Média Mensal</p>
+            <h4 class="text-2xl font-bold mt-2">15,5 NF</h4>
+        </div>
+        <div class="bg-gray-800/50 p-6 rounded-2xl border border-gray-700">
+            <p class="text-gray-400 text-sm">Pior Mês</p>
+            <h4 class="text-2xl font-bold mt-2 text-red-400">Out/25 → 34</h4>
+        </div>
+        <div class="bg-gray-800/50 p-6 rounded-2xl border border-gray-700">
+            <p class="text-gray-400 text-sm">Melhor Mês</p>
+            <h4 class="text-2xl font-bold mt-2 text-green-400">Dez/25 → 3</h4>
+        </div>
+    </div>
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard Refaturamento</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+<style>
+  body { background: #111827; color: #D1D5DB; font-family: Inter, sans-serif; margin: 2rem; }
+</style>
+</head>
+<body>
+
+<!-- TENDÊNCIA -->
+<div class="bg-gray-800/50 p-6 rounded-2xl mb-16">
+    <h4 class="font-semibold mb-4">📈 Tendência</h4>
+    <div class="flex flex-col md:flex-row gap-6">
+        <div class="flex-1 bg-green-500/10 p-4 rounded-xl border border-green-500/30">
+            <p class="text-green-400 font-semibold">Queda</p>
+            <p class="text-sm text-gray-300">Out/25 → Dez/25</p>
+        </div>
+        <div class="flex-1 bg-red-500/10 p-4 rounded-xl border border-red-500/30">
+            <p class="text-red-400 font-semibold">Alta</p>
+            <p class="text-sm text-gray-300">Jan/26 → Mar/26</p>
+        </div>
+    </div>
+</div>
+
+<!-- GRID PRINCIPAL -->
+<div class="grid md:grid-cols-2 gap-8 mt-12">
+    <div class="bg-gray-800/50 rounded-2xl border border-gray-700 h-[450px] flex flex-col p-0">
+        <h4 class="text-lg font-medium mb-4 text-purple-400 px-6 pt-6">📈 Evolução Refaturamentos</h4>
+        <div class="flex-1 w-full relative">
+            <canvas id="refaturamentoChart"></canvas>
+        </div>
+    </div>
+
+    <div class="bg-gray-800/50 p-6 rounded-2xl border border-gray-700">
+        <h4 class="text-lg font-medium mb-4 text-purple-400">📊 Distribuição dos Erros</h4>
+        <div class="flex-1 w-full relative chart-content">
+            <canvas id="distribuicaoChart"></canvas>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+/* ===============================
+   📊 STACKED BAR REAL - FORNECEDORES
+=============================== */
+let stackedBarRealInstance = null;
+function initStackedBarRealChart() {
+    const ctx = document.getElementById('stackedBarReal');
+    if (!ctx) return;
+    if (stackedBarRealInstance) stackedBarRealInstance.destroy();
+
+    const meses = ['Out/25','Nov/25','Dez/25','Jan/26','Fev/26','Mar/26'];
+    const fornecedores = ['Nivea','Cargill','Bic'];
+    const data = {
+        Nivea: [13,1,1,10,11,11],
+        Cargill: [5,4,0,2,0,1],
+        Bic: [0,0,0,9,0,1]
+    };
+    function getColor(v){if(v>=10) return '#ef4444'; if(v>=5) return '#f97316'; if(v>=2) return '#eab308'; return '#10b981';}
+
+    const datasets = fornecedores.map(f=>{
+        const values = data[f];
+        return {
+            label: f,
+            data: values,
+            backgroundColor: values.map(getColor),
+            borderRadius: 6,
+            borderWidth: 1
+        }
+    });
+
+    stackedBarRealInstance = new Chart(ctx,{
+        type:'bar',
+        data:{labels:meses,datasets},
+        options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            plugins:{
+                legend:{position:'top',labels:{color:'#D1D5DB'}},
+                tooltip:{
+                    callbacks:{
+                        label: ctx => `${ctx.dataset.label}: ${ctx.raw}`,
+                        footer: items => `Total: ${items.reduce((sum,i)=>sum+i.raw,0)}`
+                    },
+                    backgroundColor:'rgba(17,24,39,0.95)',
+                    titleColor:'#fff',
+                    bodyColor:'#D1D5DB',
+                    borderColor:'#fbbf24',
+                    borderWidth:2,
+                    cornerRadius:10,
+                    padding:12
+                }
+            },
+            scales:{
+                x:{stacked:true, grid:{display:false}, ticks:{color:'#D1D5DB'}},
+                y:{stacked:true, beginAtZero:true, ticks:{stepSize:5,color:'#D1D5DB'}, grid:{color:'rgba(255,255,255,0.05)'}}
+            }
+        }
+    });
+}
+
+/* ===============================
+   📈 EVOLUÇÃO REFATURAMENTOS
+=============================== */
+let refaturamentoChartInstance = null;
+function initRefaturamentoChart(){
+    const ctx = document.getElementById('refaturamentoChart');
+    if(!ctx) return;
+    if(refaturamentoChartInstance) refaturamentoChartInstance.destroy();
+
+    const labels = ['Out/25','Nov/25','Dez/25','Jan/26','Fev/26','Mar/26'];
+    const data = [34,18,3,23,11,16];
+
+    refaturamentoChartInstance = new Chart(ctx,{
+        type:'line',
+        data:{labels,datasets:[{
+            label:'Refaturamentos',
+            data,
+            tension:0.4,
+            fill:true,
+            borderWidth:4,
+            pointRadius:6,
+            pointHoverRadius:8,
+            pointBackgroundColor:'#A855F7',
+            pointBorderColor:'#fff',
+            pointBorderWidth:2,
+            borderColor:'#fb923c',
+            backgroundColor:ctx=>{
+                const chart = ctx.chart;
+                const {ctx:c, chartArea} = chart;
+                if(!chartArea) return;
+                const grad = c.createLinearGradient(0,chartArea.top,0,chartArea.bottom);
+                grad.addColorStop(0,'rgba(168,85,247,0.4)');
+                grad.addColorStop(1,'rgba(168,85,247,0.02)');
+                return grad;
+            }
+        }]}
+        ,options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            animation:{duration:1200,easing:'easeOutQuart'},
+            plugins:{legend:{labels:{color:'#D1D5DB'}},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.raw}`}}},
+            scales:{y:{beginAtZero:true,ticks:{stepSize:5,color:'#D1D5DB'},grid:{color:'rgba(255,255,255,0.05)'}},x:{grid:{display:false},ticks:{color:'#D1D5DB'}}}
+        }});
+}
+
+/* ===============================
+   📊 DISTRIBUIÇÃO DE ERROS
+=============================== */
+let distribuicaoChartInstance = null;
+function initDistribuicaoChart(){
+    const ctx = document.getElementById('distribuicaoChart');
+    if(!ctx) return;
+    if(distribuicaoChartInstance) distribuicaoChartInstance.destroy();
+
+    distribuicaoChartInstance = new Chart(ctx,{
+        type:'doughnut',
+        data:{
+            labels:['Erro Tipo A','Erro Tipo B','Erro Tipo C'],
+            datasets:[{data:[12,30,8],backgroundColor:['#f87171','#fbbf24','#34d399'],borderWidth:2,borderColor:'#111827'}]
+        },
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#D1D5DB'}},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.raw}`}}}}
+    });
+}
+
+/* ===============================
+   🔥 INICIALIZAÇÃO DE TODOS OS GRÁFICOS
+=============================== */
+document.addEventListener('DOMContentLoaded',()=>{
+    initStackedBarRealChart();
+    initRefaturamentoChart();
+    initDistribuicaoChart();
+});
+</script>
+
+</body>
+</html>
+<section id="emails-cards" class="mb-16">
+  <!-- HEADER -->
+  <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
+    <div>
+      <h3 class="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent mb-1">
+        📧 E-mails de Alinhamento
+      </h3>
+      <p class="text-emerald-300 font-medium text-sm">Comunicação proativa com fornecedores</p>
+    </div>
+    <div class="text-right">
+      <div id="totalEmailsCard" class="text-3xl font-bold text-white bg-emerald-500/20 px-6 py-3 rounded-2xl border border-emerald-400/50">
+        22 e-mails
+      </div>
+    </div>
+  </header>
+
+  <!-- CARDS KPI -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Card Mês Mais Ativo -->
+    <div class="group p-6 bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 border border-emerald-500/40 rounded-2xl hover:scale-105 hover:shadow-2xl hover:shadow-emerald-500/25 transition-all duration-300 backdrop-blur-xl">
+      <div class="flex items-center justify-center w-16 h-16 bg-emerald-500/30 rounded-2xl mb-4 group-hover:rotate-12 transition-transform">
+        <i class="fas fa-calendar-day text-2xl text-emerald-400"></i>
+      </div>
+      <h4 id="mesMaisCard" class="text-3xl font-bold text-white mb-2">Outubro (8)</h4>
+      <p class="text-emerald-200 font-semibold text-sm uppercase tracking-wide">Mês Mais Ativo</p>
+    </div>
+
+    <!-- Card Desempenho Médio -->
+    <div class="group p-6 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border border-yellow-500/40 rounded-2xl hover:scale-105 hover:shadow-2xl hover:shadow-yellow-500/25 transition-all duration-300 backdrop-blur-xl">
+      <div class="flex items-center justify-center w-16 h-16 bg-yellow-500/30 rounded-2xl mb-4 group-hover:rotate-12 transition-transform">
+        <i class="fas fa-chart-line text-2xl text-yellow-400"></i>
+      </div>
+      <h4 class="text-3xl font-bold text-white mb-2">Média: 3,7/mês</h4>
+      <p class="text-yellow-200 font-semibold text-sm uppercase tracking-wide">Desempenho Médio</p>
+    </div>
+
+    <!-- Card Mês Menos Ativo -->
+    <div class="group p-6 bg-gradient-to-br from-red-500/20 to-pink-500/20 border border-red-500/40 rounded-2xl hover:scale-105 hover:shadow-2xl hover:shadow-red-500/25 transition-all duration-300 backdrop-blur-xl">
+      <div class="flex items-center justify-center w-16 h-16 bg-red-500/30 rounded-2xl mb-4 group-hover:rotate-12 transition-transform">
+        <i class="fas fa-calendar-times text-2xl text-red-400"></i>
+      </div>
+      <h4 id="mesMenosCard" class="text-3xl font-bold text-white mb-2">Fevereiro (1)</h4>
+      <p class="text-red-200 font-semibold text-sm uppercase tracking-wide">Mês Menos Ativo</p>
+    </div>
+  </div>
+</section>
+
+<!-- INSIGHT (FORA DA GRID) -->
+<div class="mt-8">
+    <div class="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-6 flex items-start gap-4">
+
+        <!-- ÍCONE -->
+        <div class="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+            🧠
+        </div>
+
+        <!-- CONTEÚDO -->
+        <div class="flex-1">
+            
+            <!-- TÍTULO -->
+            <h4 class="text-lg font-medium mb-4 text-purple-400">
+                Insight Principal
+                <span class="ml-2 px-3 py-1 bg-blue-500/20 text-blue-300 text-xs rounded-full font-medium">
+                    CRÍTICO
+                </span>
+            </h4>
+
+            <!-- MÉTRICAS -->
+            <p class="text-lg leading-relaxed text-gray-200 tracking-wide">
+                🚨 <span class="text-red-400 font-bold">16 NF em Mar/26</span>  
+                <span class="mx-2 text-gray-500">|</span>
+                📈 <span class="text-purple-400 font-semibold">+45% vs Fev</span>  
+                <span class="mx-2 text-gray-500">|</span>
+                📉 <span class="text-green-400 font-bold">-53% vs pico</span>
+            </p>
+
+            <!-- LEITURA EXECUTIVA -->
+            <p class="text-sm text-gray-400 mt-2">
+                Tendência de alta recente, indicando risco de reversão da melhora observada.
+            </p>
+
+        </div>
+
+    </div>
+</div>
+
+        <!-- 2. PROBLEMA IDENTIFICADO -->
+       <section id="problema" class="mb-16">
+    <h3 class="text-2xl font-semibold text-red-400 flex items-center justify-center mt-12">
+        <i class="fas fa-exclamation-triangle mr-4"></i>
+        Problema Identificado
+    </h3>
+    <!-- Card problema principal aqui -->
+</section>  
+
+        <div class="space-y-8">
+
+    <!-- RESUMO DO PROBLEMA -->
+    <div class="bg-red-500/10 border border-red-500/30 rounded-3xl p-8">
+        <h4 class="text-lg text-gray-400 mb-2">Resumo Executivo</h4>
+        <p class="text-2xl font-bold text-red-400 leading-relaxed">
+            93 NF refaturadas com padrão recorrente — não são casos isolados,
+            mas falhas operacionais consistentes.
+        </p>
+    </div>
+
+    <!-- CAUSAS + CONCENTRAÇÃO -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <!-- CAUSAS -->
+        <div class="bg-gray-800/50 p-6 rounded-2xl border border-gray-700">
+            <h4 class="font-semibold mb-6">📊 Principais Causas</h4>
+            
+            <div class="space-y-4">
+                <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span>Pedido incorreto</span>
+                        <span class="text-red-400 font-semibold">~50%</span>
+                    </div>
+                    <div class="w-full bg-gray-700 h-2 rounded-full">
+                        <div class="bg-red-400 h-2 rounded-full w-1/2"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span>Cadastro errado</span>
+                        <span class="text-purple-400 font-semibold">~30%</span>
+                    </div>
+                    <div class="w-full bg-gray-700 h-2 rounded-full">
+                        <div class="bg-orange-400 h-2 rounded-full w-[30%]"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span>Condição de pagamento</span>
+                        <span class="text-blue-400 font-semibold">~20%</span>
+                    </div>
+                    <div class="w-full bg-gray-700 h-2 rounded-full">
+                        <div class="bg-yellow-400 h-2 rounded-full w-[20%]"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONCENTRAÇÃO -->
+        <div class="bg-gray-800/50 p-6 rounded-2xl border border-gray-700">
+            <h4 class="font-semibold mb-6">🏷️ Concentração do Problema</h4>
+
+            <div class="space-y-4 text-sm">
+                <div class="flex justify-between">
+                    <span>Nivea</span>
+                    <span class="text-red-400 font-semibold">46 NF (49,5%) 🚨</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Rede Lucas</span>
+                    <span class="text-purple-400 font-semibold">22 NF (~24%)</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Top 3 fornecedores</span>
+                    <span class="text-blue-400 font-semibold">~73% dos erros</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- IMPACTO OPERACIONAL -->
+    <div class="bg-gray-800/50 p-6 rounded-2xl border border-gray-700">
+        <h4 class="font-semibold mb-4">💥 Impacto Operacional</h4>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+            <div class="bg-gray-900/50 p-4 rounded-xl">🔁 Retrabalho elevado</div>
+            <div class="bg-gray-900/50 p-4 rounded-xl">⏳ Atraso no faturamento</div>
+            <div class="bg-gray-900/50 p-4 rounded-xl">⚠️ Risco com cliente</div>
+            <div class="bg-gray-900/50 p-4 rounded-xl">📉 Perda de eficiência</div>
+        </div>
+    </div>
+
+    <!-- CONCLUSÃO -->
+    <div class="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-6">
+        <h4 class="font-semibold mb-3">🧠 Conclusão</h4>
+        <p class="text-gray-300 leading-relaxed">
+            O problema é <span class="text-red-400 font-semibold">estrutural e concentrado</span>,
+            com quase metade dos erros ligados a um único fornecedor.
+            A recorrência em clientes específicos indica falha de processo,
+            reforçando a necessidade de 
+            <span class="text-blue-400 font-semibold">controle pré-faturamento</span>.
+        </p>
+    </div>
+
+</div>
+
+        <!-- 3. ANÁLISE DETALHADA -->
+        <section id="analise" class="mb-16">
+    <h3 class="text-2xl font-semibold text-red-400 flex items-center justify-center mt-12">
+        <i class="fas fa-search mr-4"></i>
+        Análise Detalhada
+    </h3>
+    <!-- Tabelas, gráficos secundários aqui -->
+</section>
+
+        <div class="space-y-8">
+
+    <!-- RESUMO EXECUTIVO -->
+    <div class="bg-blue-500/10 border border-blue-500/30 rounded-3xl p-8">
+        <h4 class="text-lg text-gray-400 mb-2">Resumo da Análise</h4>
+        <p class="text-2xl font-bold text-blue-400 leading-relaxed">
+            93 NF refaturadas com forte concentração em poucos clientes e fornecedores,
+            permitindo atuação direta e rápida.
+        </p>
+    </div>
+
+    <!-- CLIENTES + FORNECEDORES -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+        <!-- CLIENTES -->
+        <div class="bg-gray-800/50 p-6 rounded-2xl border border-gray-700">
+            <h4 class="font-semibold mb-6">🏪 Concentração por Cliente</h4>
+
+            <div class="space-y-4 text-sm">
+                <div class="flex justify-between">
+                    <span>Rede Lucas</span>
+                    <span class="text-red-400 font-semibold">22 NF (~24%) 🚨</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>União de Araguari</span>
+                    <span class="text-purple-400">Volume relevante</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Tejotão</span>
+                    <span class="text-blue-400">Erros distribuídos</span>
+                </div>
+            </div>
+
+            <div class="mt-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-sm">
+                👉 Top 3 clientes concentram mais de <span class="font-semibold text-red-400">40%</span> dos refaturamentos
+            </div>
+        </div>
+
+        <!-- FORNECEDORES -->
+        <div class="bg-gray-800/50 p-6 rounded-2xl border border-gray-700">
+            <h4 class="font-semibold mb-6">🏷️ Concentração por Fornecedor</h4>
+
+            <div class="space-y-4 text-sm">
+                <div>
+                    <div class="flex justify-between mb-1">
+                        <span>Nivea</span>
+                        <span class="text-red-400 font-semibold">46 NF (49,5%) 🚨</span>
+                    </div>
+                    <div class="w-full bg-gray-700 h-2 rounded-full">
+                        <div class="bg-red-400 h-2 rounded-full w-1/2"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between mb-1">
+                        <span>Cargill</span>
+                        <span class="text-purple-400 font-semibold">12 NF (12,9%)</span>
+                    </div>
+                    <div class="w-full bg-gray-700 h-2 rounded-full">
+                        <div class="bg-orange-400 h-2 rounded-full w-[13%]"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between mb-1">
+                        <span>Bic</span>
+                        <span class="text-blue-400 font-semibold">10 NF (10,7%)</span>
+                    </div>
+                    <div class="w-full bg-gray-700 h-2 rounded-full">
+                        <div class="bg-yellow-400 h-2 rounded-full w-[11%]"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-sm">
+                👉 Top 3 fornecedores representam cerca de <span class="font-semibold text-red-400">73%</span> dos erros
+            </div>
+        </div>
+    </div>
+
+    <!-- RANKING -->
+    <div class="bg-gray-800/50 p-6 rounded-2xl border border-gray-700">
+        <h4 class="font-semibold mb-6">🏆 Principais Responsáveis</h4>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+            <div class="bg-red-500/10 border border-red-500/30 p-4 rounded-xl text-center">
+                🥇 Nivea
+            </div>
+            <div class="bg-orange-500/10 border border-orange-500/30 p-4 rounded-xl text-center">
+                🥈 Rede Lucas
+            </div>
+            <div class="bg-yellow-500/10 border border-yellow-500/30 p-4 rounded-xl text-center">
+                🥉 Cargill
+            </div>
+            <div class="bg-gray-700/50 p-4 rounded-xl text-center">
+                Bic
+            </div>
+        </div>
+    </div>
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedidos + Refaturamentos - Combo Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            background: linear-gradient(135deg, #0B0B0F 0%, #111118 50%, #0B0B0F 100%);
+            color: #E4E4E7; 
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title> Dashboard Pedidos x Refaturamentos</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+    background: linear-gradient(135deg, #0B0B0F, #111118);
+    font-family: 'Inter', sans-serif;
+    color: #E4E4E7;
+}
+.card {
+    backdrop-filter: blur(20px);
+}
+</style>
+</head>
+
+<body class="p-6">
+
+<div class="max-w-7xl mx-auto">
+
+    <!-- HEADER -->
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            Pedidos vs Refaturamentos - NIVEA
+        </h1>
+        <p class="text-gray-400 mt-2">
+            Comparativo mensal com taxa de impacto
+        </p>
+    </div>
+
+    <!-- KPI -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+        <div class="card bg-green-500/10 p-6 rounded-2xl border border-green-500/20">
+            <p class="text-sm text-green-400">Pedidos</p>
+            <h3 id="kpiPedidos" class="text-3xl font-bold">-</h3>
+        </div>
+
+        <div class="card bg-red-500/10 p-6 rounded-2xl border border-red-500/20">
+            <p class="text-sm text-red-400">Refaturamentos</p>
+            <h3 id="kpiRefat" class="text-3xl font-bold">-</h3>
+        </div>
+
+        <div class="card bg-blue-500/10 p-6 rounded-2xl border border-blue-500/20">
+            <p class="text-sm text-blue-400">Média</p>
+            <h3 id="kpiMedia" class="text-3xl font-bold">-</h3>
+        </div>
+
+        <div class="card bg-orange-500/10 p-6 rounded-2xl border border-orange-500/20">
+            <p class="text-sm text-orange-400">Taxa Média</p>
+            <h3 id="kpiTaxa" class="text-3xl font-bold">-</h3>
+        </div>
+    </div>
+
+    <!-- CHART -->
+    <div class="card bg-gray-900/40 p-8 rounded-3xl border border-gray-700">
+        <canvas id="chart" height="120"></canvas>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // =========================
+    // 📊 DADOS
+    // =========================
+    const data = {
+        meses: ['Out/25','Nov/25','Dez/25','Jan/26','Fev/26','Mar/26'],
+        pedidos: [80,71,87,46,62,56],
+        refat: [34,6,3,23,11,16]
+    };
+
+    // =========================
+    // 🧠 KPIs AUTOMÁTICOS
+    // =========================
+    const totalPedidos = data.pedidos.reduce((a,b)=>a+b,0);
+    const totalRefat = data.refat.reduce((a,b)=>a+b,0);
+    const media = Math.round(totalPedidos / data.meses.length);
+    const taxa = ((totalRefat / totalPedidos) * 100).toFixed(1);
+
+    document.getElementById('kpiPedidos').innerText = totalPedidos;
+    document.getElementById('kpiRefat').innerText = totalRefat;
+    document.getElementById('kpiMedia').innerText = media + "/mês";
+    document.getElementById('kpiTaxa').innerText = taxa + "%";
+
+    // =========================
+    // 🎨 GRADIENTE (OTIMIZADO)
+    // =========================
+    const ctx = document.getElementById('chart').getContext('2d');
+
+    const gradientBar = ctx.createLinearGradient(0, 0, 0, 400);
+    gradientBar.addColorStop(0, 'rgba(34,197,94,0.8)');
+    gradientBar.addColorStop(1, 'rgba(34,197,94,0.05)');
+
+    const gradientLine = ctx.createLinearGradient(0, 0, 0, 400);
+    gradientLine.addColorStop(0, 'rgba(251,191,36,0.4)');
+    gradientLine.addColorStop(1, 'rgba(251,191,36,0.02)');
+
+    // =========================
+    // 🚨 CORES DINÂMICAS
+    // =========================
+    const getColor = (v) => {
+        if (v >= 20) return '#ef4444';
+        if (v >= 10) return '#f97316';
+        if (v >= 5) return '#eab308';
+        return '#10b981';
+    };
+
+    // =========================
+    // 📈 CHART
+    // =========================
+    new Chart(ctx, {
+        data: {
+            labels: data.meses,
+            datasets: [
+                {
+                    type: 'bar',
+                    label: 'Pedidos',
+                    data: data.pedidos,
+                    backgroundColor: gradientBar,
+                    borderRadius: 10
+                },
+                {
+                    type: 'line',
+                    label: 'Refaturamentos',
+                    data: data.refat,
+                    borderColor: '#fbbf24',
+                    backgroundColor: gradientLine,
+                    pointBackgroundColor: data.refat.map(getColor),
+                    pointRadius: 8,
+                    tension: 0.4,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            plugins: {
+                legend: {
+                    labels: { color: '#E4E4E7' }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => {
+                            const i = ctx.dataIndex;
+                            const pedidos = data.pedidos[i];
+                            const ref = data.refat[i];
+                            const pct = ((ref / pedidos) * 100).toFixed(1);
+
+                            if (ctx.datasetIndex === 0)
+                                return `Pedidos: ${pedidos}`;
+
+                            return `Refat: ${ref} (${pct}%)`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: '#9CA3AF' },
+                    grid: { color: 'rgba(255,255,255,0.05)' }
+                },
+                x: {
+                    ticks: { color: '#9CA3AF' },
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+
+});
+</script>
+
+</body>
+</html>
+
+
+    <!-- COMPORTAMENTO TEMPORAL -->
+    <div class="bg-gray-800/50 p-6 rounded-2xl border border-gray-700">
+        <h4 class="font-semibold mb-6">📅 Comportamento ao Longo do Tempo</h4>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+            <div class="bg-red-500/10 border border-red-500/30 p-4 rounded-xl">
+                <p class="font-semibold text-red-400">Out/25</p>
+                <p class="text-gray-300">Pico: 34 NF</p>
+            </div>
+
+            <div class="bg-green-500/10 border border-green-500/30 p-4 rounded-xl">
+                <p class="font-semibold text-green-400">Dez/25</p>
+                <p class="text-gray-300">Melhor resultado: 3 NF</p>
+            </div>
+
+            <div class="bg-orange-500/10 border border-orange-500/30 p-4 rounded-xl">
+                <p class="font-semibold text-purple-400 ">Jan–Mar/26</p>
+                <p class="text-gray-300">Retomada de crescimento</p>
+            </div>
+
+            <div class="bg-red-500/10 border border-red-500/30 p-4 rounded-xl">
+                <p class="font-semibold text-red-400">Fev/26</p>
+                <p class="text-gray-300">100% concentrado em Nivea</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONCLUSÃO -->
+    <div class="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-6">
+        <h4 class="font-semibold mb-3">🧠 Conclusão</h4>
+        <p class="text-gray-300 leading-relaxed">
+            Os erros não estão pulverizados — são 
+            <span class="text-red-400 font-semibold">concentrados e recorrentes</span>.
+            A combinação de fornecedor crítico (Nivea) com clientes específicos
+            evidencia uma falha de processo direcionada, com 
+            <span class="text-blue-400 font-semibold">alto potencial de correção rápida</span>.
+        </p>
+    </div>
+
+</div>
+
+        <!-- 4. SOLUÇÕES PROPOSTAS -->
+        <section id="solucoes" class="mb-16">
+    <h3 class="text-2xl font-semibold text-red-400 flex items-center justify-center mt-12 mb-6">
+        <i class="fas fa-lightbulb mr-4"></i>
+        Soluções Propostas
+    </h3>
+    <!-- Cards de soluções aqui -->
+</section>
+
+        <div class="space-y-8">
+
+    <!-- RESUMO EXECUTIVO -->
+    <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-3xl p-8">
+        <h4 class="text-lg text-gray-400 mb-2">Resumo da Solução</h4>
+        <p class="text-2xl font-bold text-blue-400  leading-relaxed">
+            Automatização do processo de pedidos da Nivea elimina o principal foco de erro,
+            responsável por 49,5% dos refaturamentos.
+        </p>
+    </div>
+
+    <!-- PROBLEMA ANTES -->
+    <div class="bg-red-500/10 border border-red-500/30 rounded-2xl p-6">
+        <h4 class="font-semibold mb-4">⚙️ Processo Anterior (Manual)</h4>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+            <div class="bg-gray-900/50 p-4 rounded-xl">⏳ 3 a 5 horas por rede</div>
+            <div class="bg-gray-900/50 p-4 rounded-xl">✍️ Processo 100% manual</div>
+            <div class="bg-gray-900/50 p-4 rounded-xl">⚠️ Alto risco de erro</div>
+        </div>
+
+        <div class="mt-6 grid md:grid-cols-3 gap-4 text-sm">
+            <div class="bg-red-500/10 p-4 rounded-xl">Erro de preço</div>
+            <div class="bg-red-500/10 p-4 rounded-xl">Erro de quantidade</div>
+            <div class="bg-red-500/10 p-4 rounded-xl">Pedido inconsistente</div>
+        </div>
+
+        <div class="mt-6 text-sm text-gray-300">
+            Impacto: retrabalho, conflitos com a indústria e erros na solicitação de investimento.
+        </div>
+    </div>
+
+    <!-- SOLUÇÃO -->
+    <div class="bg-green-500/10 border border-green-500/30 rounded-2xl p-6">
+        <h4 class="font-semibold mb-4">🚀 Solução Implementada</h4>
+
+        <p class="text-gray-300 mb-4">
+            Desenvolvimento de um sistema automatizado para consolidação e padronização de pedidos.
+        </p>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+            <div class="bg-gray-900/50 p-4 rounded-xl">📊 Consolidação por rede</div>
+            <div class="bg-gray-900/50 p-4 rounded-xl">💲 Preços automáticos</div>
+            <div class="bg-gray-900/50 p-4 rounded-xl">📦 Quantidades automáticas</div>
+            <div class="bg-gray-900/50 p-4 rounded-xl">📄 Planilha padronizada</div>
+        </div>
+
+        <!-- BOTÃO DO SITE -->
+        <div class="mt-6">
+            <a href="https://simuladornivea.streamlit.app/" target="_blank"
+               class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-xl font-medium transition">
+                🔗 Acessar Sistema
+            </a>
+        </div>
+    </div>
+
+    <!-- GANHOS -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+        <!-- PRODUTIVIDADE -->
+        <div class="bg-gray-800/50 p-6 rounded-2xl border border-gray-700">
+            <h4 class="font-semibold mb-4">⏱️ Ganho de Produtividade</h4>
+            <p class="text-2xl font-bold text-green-400 mb-2">
+                +90%
+            </p>
+            <p class="text-sm text-gray-300">
+                Redução de até 5 horas para poucos minutos no processo de montagem de pedidos.
+            </p>
+        </div>
+
+        <!-- ERROS -->
+        <div class="bg-gray-800/50 p-6 rounded-2xl border border-gray-700">
+            <h4 class="font-semibold mb-4">❌ Redução de Erros</h4>
+            <p class="text-2xl font-bold text-green-400 mb-2">
+                Até 100%
+            </p>
+            <p class="text-sm text-gray-300">
+                Eliminação dos erros manuais ligados ao processo operacional.
+            </p>
+        </div>
+
+    </div>
+
+    <!-- IMPACTO DIRETO -->
+    <div class="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-6">
+        <h4 class="font-semibold mb-4">📉 Impacto Direto Esperado</h4>
+
+        <p class="text-2xl font-bold text-blue-400 mb-3">
+            Redução de até 49% dos refaturamentos
+        </p>
+
+        <p class="text-sm text-gray-300">
+            Eliminação do principal foco de erro (Nivea), responsável por quase metade dos casos.
+        </p>
+    </div>
+
+    <!-- IMPACTO NO NEGÓCIO -->
+    <div class="bg-gray-800/50 p-6 rounded-2xl border border-gray-700">
+        <h4 class="font-semibold mb-4">💥 Impacto no Negócio</h4>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-4 text-sm">
+            <div class="bg-gray-900/50 p-4 rounded-xl">✔ Maior precisão</div>
+            <div class="bg-gray-900/50 p-4 rounded-xl">✔ Menos retrabalho</div>
+            <div class="bg-gray-900/50 p-4 rounded-xl">✔ Sem conflitos</div>
+            <div class="bg-gray-900/50 p-4 rounded-xl">✔ Mais agilidade</div>
+            <div class="bg-gray-900/50 p-4 rounded-xl">✔ Processo confiável</div>
+        </div>
+    </div>
+
+    <!-- CONCLUSÃO -->
+    <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-2xl p-6">
+        <h4 class="font-semibold mb-3">🧠 Conclusão</h4>
+        <p class="text-gray-300 leading-relaxed">
+            A automatização elimina o principal gargalo operacional, atacando diretamente
+            quase metade dos refaturamentos. O processo deixa de ser manual e suscetível a erro,
+            tornando-se rápido, padronizado e altamente confiável.
+        </p>
+    </div>
+
+    <!-- 🚨 FOCO NIVEA: Limitação de Automação -->
+<section id="foco-nivea" class="mb-16">
+    <h3 class="text-2xl font-semibold mb-6 flex items-center text-red-400">
+        <i class="fas fa-exclamation-circle mr-4"></i>
+        🚨 Foco Nivea: Limitação de Automação
+    </h3>
+
+    <div class="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50 rounded-3xl p-8 space-y-6">
+
+        <!-- PROBLEMA -->
+        <div>
+            <h4 class="font-semibold text-lg text-red-400 mb-2">⚙️ Problema identificado</h4>
+            <p class="text-gray-300 text-sm leading-relaxed">
+                O alto número de refaturamentos com Nivea (46 NF, 49,5% do total) se deve à impossibilidade 
+                de padronizar combos e ações automáticas no sistema devido às restrições do site Reppos. 
+                Todas as alterações precisam ser solicitadas manualmente, aumentando tempo e risco de erro.
+            </p>
+        </div>
+
+        <!-- IMPACTO -->
+        <div>
+            <h4 class="font-semibold text-lg text-purple-400 mb-2">📊 Impacto operacional</h4>
+            <ul class="text-gray-300 text-sm list-disc list-inside space-y-1">
+                <li>Tempo perdido na solicitação de ajustes manuais</li>
+                <li>Possibilidade de erros de preço e quantidade</li>
+                <li>Conflitos no fechamento com a indústria</li>
+                <li>Retrabalho contínuo para vendedores e equipe comercial</li>
+            </ul>
+        </div>
+
+        <!-- MITIGAÇÃO -->
+        <div>
+            <h4 class="font-semibold text-lg text-green-400 mb-2">🚀 Caminho para mitigação</h4>
+            <ul class="text-gray-300 text-sm list-disc list-inside space-y-1">
+                <li>Identificação das alterações mais frequentes para priorização</li>
+                <li>Padronização futura de combos e promoções, assim que viabilizado no sistema</li>
+                <li>Comunicação constante com a equipe Nivea e time comercial para antecipar ajustes</li>
+            </ul>
+        </div>
+
+        <!-- CONCLUSÃO -->
+        <div>
+            <h4 class="font-semibold text-lg text-blue-400 mb-2">🧠 Conclusão</h4>
+            <p class="text-gray-300 text-sm leading-relaxed">
+                👉 Mesmo com automação parcial, o gargalo do Reppos mantém uma parcela de refaturamentos, 
+                reforçando a necessidade de processos complementares de checagem e alinhamento manual estratégico 
+                até que a padronização seja possível.
+            </p>
+        </div>
+
+    </div>
+</section>
+
+<!-- 💡 SOLUÇÃO - TOP CONTAS -->
+<section id="top-contas" class="mb-16">
+    <h3 class="text-2xl font-semibold mb-6 flex items-center text-red-400">
+        <i class="fas fa-lightbulb mr-4"></i>
+     Solução para Outras Indústrias: Top Contas
+    </h3>
+
+    <div class="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50 rounded-3xl p-8 space-y-6">
+
+        <!-- PROBLEMA -->
+        <div>
+            <h4 class="font-semibold text-lg text-red-400 mb-2">⚙️ Problema identificado</h4>
+            <p class="text-gray-300 text-sm leading-relaxed">
+                Clientes Top Contas recebiam simultaneamente alteração manual de preço no pedido
+                e descontos ou brindes automáticos do sistema, gerando duplicidade de ajustes,
+                erros de cálculo e risco elevado de refaturamento.
+            </p>
+        </div>
+
+        <!-- SOLUÇÃO -->
+        <div>
+            <h4 class="font-semibold text-lg text-green-400 mb-2">🚀 Solução implementada</h4>
+            <ul class="text-gray-300 text-sm list-disc list-inside space-y-1">
+                <li>Cancelamento de ações automáticas (desconto/brinde) para Top Contas</li>
+                <li>Validação manual obrigatória antes do fechamento</li>
+                <li>Controle para evitar sobreposição de ajustes no pedido</li>
+            </ul>
+        </div>
+
+        <!-- IMPACTO -->
+        <div>
+            <h4 class="font-semibold text-lg text-blue-400 mb-2">📊 Impacto esperado</h4>
+            <ul class="text-gray-300 text-sm list-disc list-inside space-y-1">
+                <li>Redução significativa de erros de preço e quantidade</li>
+                <li>Evita refaturamentos desnecessários</li>
+                <li>Maior controle sobre investimentos comerciais</li>
+                <li>Processo mais previsível e confiável</li>
+            </ul>
+        </div>
+
+        <!-- CONCLUSÃO -->
+        <div>
+            <h4 class="font-semibold text-lg text-blue-400 mb-2">🧠 Conclusão</h4>
+            <p class="text-gray-300 text-sm leading-relaxed">
+                👉 A medida previne inconsistências nos pedidos de Top Contas, garantindo que qualquer ajuste
+                seja único, intencional e controlado, reduzindo riscos de conflito com a indústria
+                e eliminando retrabalho operacional.
+            </p>
+        </div>
+
+    </div>
+</section>
+
+    <div class="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-6">
+
+    <!-- TÍTULO -->
+    <h4 class="font-semibold mb-4">🤝 Alinhamento e Comunicação - Administrativo</h4>
+
+    <!-- DESCRIÇÃO -->
+    <div class="space-y-3 text-sm text-gray-300 mb-6">
+        <p>
+            Implementação de comunicação direta e frequente com supervisores e gerentes,
+            garantindo alinhamento rápido sobre erros e correções.
+        </p>
+        <p>
+            Integração contínua com o time comercial, assegurando clareza nas condições,
+            campanhas e execução dos pedidos.
+        </p>
+    </div>
+
+    <!-- RESULTADO -->
+    <div class="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mb-4">
+        <h5 class="font-semibold text-green-400 mb-2">📊 Resultado Prático</h5>
+
+        <div class="grid grid-cols-2 gap-4 text-center">
+            <div>
+                <p class="text-2xl font-bold text-green-400">2</p>
+                <p class="text-xs text-gray-300">Refaturamentos (2 meses)</p>
+            </div>
+            <div>
+                <p class="text-2xl font-bold text-green-400">1</p>
+                <p class="text-xs text-gray-300">No mês atual</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- INSIGHT -->
+    <div class="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 text-sm">
+        👉 Evidenciando <span class="text-green-400 font-semibold">redução superior a 90%</span> 
+        nos erros administrativos e maior controle do processo operacional.
+    </div>
+
+</div>
+
+    <!-- CONTROLE OPERACIONAL -->
+<div class="bg-purple-500/10 border border-purple-500/30 rounded-2xl p-6">
+    <h4 class="font-semibold mb-4">⏰ Controle de Alterações Operacionais</h4>
+
+    <p class="text-gray-300 mb-4">
+        Implementação de regra operacional para envio de alterações manuais
+        (preço, prazo, bonificação e desconto), com prazo limite até <span class="font-semibold text-purple-400">16:00</span>,
+        garantindo tempo hábil para validação e correções.
+    </p>
+
+    <div class="grid md:grid-cols-2 gap-6">
+        
+        <!-- ANTES -->
+        <div class="bg-red-500/10 border border-red-500/30 p-4 rounded-xl">
+            <h5 class="font-semibold text-red-400 mb-2">Antes</h5>
+            <p class="text-sm text-gray-300">
+                Alterações enviadas sem controle de horário, aumentando risco de erro
+                e falta de tempo para validação.
+            </p>
+        </div>
+
+        <!-- DEPOIS -->
+        <div class="bg-green-500/10 border border-green-500/30 p-4 rounded-xl">
+            <h5 class="font-semibold text-green-400 mb-2">Depois</h5>
+            <p class="text-sm text-gray-300">
+                Processo com prazo definido, permitindo revisão adequada e redução de falhas.
+            </p>
+        </div>
+
+    </div>
+
+    <!-- RESULTADO -->
+    <div class="mt-6 bg-green-500/10 border border-green-500/30 rounded-xl p-4">
+        <p class="text-lg font-bold text-green-400">
+            ✅ Apenas 1 refaturamento por erro de vendedor nos últimos 60 dias
+        </p>
+    </div>
+</div>
+
+</div>
+
+        <!-- 5. PROJEÇÕES -->
+        <section id="projecoes">
+    <h3 class="text-2xl font-semibold text-red-400 flex items-center justify-center mt-12 mb-6">
+        <i class="fas fa-chart-area mr-4"></i>
+        Projeções Futuras
+    </h3>
+
+    <div class="space-y-8">
+        <!-- Conteúdo das projeções aqui -->
+    </div>
+</section>
+
+    <!-- RESUMO EXECUTIVO -->
+<div class="bg-green-500/10 border border-green-500/30 rounded-3xl p-8 mb-8">
+    <h4 class="text-lg text-gray-400 mb-2">Visão de Futuro</h4>
+    <p class="text-2xl font-bold text-green-400 leading-relaxed">
+        Evolução do processo para eliminação total dos refaturamentos operacionais.
+    </p>
+</div>
+
+<!-- META -->
+<div class="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-6 mb-8">
+    <h4 class="font-semibold mb-4">🎯 Meta Estratégica</h4>
+    <div class="grid md:grid-cols-3 gap-4 text-center">
+        <div class="bg-gray-900/50 p-4 rounded-xl">
+            <p class="text-sm text-gray-400">Situação Atual</p>
+            <p class="text-2xl font-bold text-blue-400">1 a 2</p>
+            <p class="text-xs text-gray-300">NF/mês</p>
+        </div>
+        <div class="bg-gray-900/50 p-4 rounded-xl">
+            <p class="text-sm text-gray-400">Meta</p>
+            <p class="text-2xl font-bold text-green-400">0</p>
+            <p class="text-xs text-gray-300">Refaturamentos</p>
+        </div>
+        <div class="bg-green-500/10 border border-green-500/30 p-4 rounded-xl">
+            <p class="text-sm text-gray-400">Status</p>
+            <p class="text-2xl font-bold text-green-400">-90%</p>
+            <p class="text-xs text-gray-300">Já reduzido</p>
+        </div>
+    </div>
+</div>
+
+<!-- ESTRATÉGIA -->
+<div class="grid md:grid-cols-2 gap-8 mb-8">
+
+    <!-- PREVENÇÃO -->
+    <div class="bg-purple-500/10 border border-purple-500/30 rounded-2xl p-6">
+        <h4 class="font-semibold mb-4">🔒 Prevenção (Processo)</h4>
+        <ul class="text-sm text-gray-300 space-y-3">
+            <li>✔ Automação completa dos pedidos</li>
+            <li>✔ Revisão obrigatória pré-faturamento</li>
+            <li>✔ Alinhamento contínuo com comercial</li>
+            <li>✔ Integração com gestão</li>
+        </ul>
+    </div>
+
+    <!-- SOLUÇÃO -->
+    <div class="bg-orange-500/10 border border-orange-500/30 rounded-2xl p-6">
+        <h4 class="font-semibold mb-4">⚡ Solução sem Refaturamento</h4>
+        <p class="text-sm text-gray-300 mb-4">
+            Tratamento de divergências sem necessidade de refaturar:
+        </p>
+        <ul class="text-sm text-gray-300 space-y-3">
+            <li>✔ Desconto em boleto</li>
+            <li>✔ Bonificações</li>
+            <li>✔ Ajustes comerciais negociados</li>
+        </ul>
+        <div class="mt-4 text-sm text-orange-300">
+            👉 Evita retrabalho e impacto operacional
+        </div>
+    </div>
+</div>
+
+<!-- RESULTADO ESPERADO -->
+<div class="bg-gray-800/50 border border-gray-700 rounded-2xl p-6 mb-8">
+    <h4 class="font-semibold mb-4">📊 Resultado Esperado</h4>
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+        <div class="bg-gray-900/50 p-4 rounded-xl">✔ Erros eliminados</div>
+        <div class="bg-gray-900/50 p-4 rounded-xl">✔ 0 refaturamentos</div>
+        <div class="bg-gray-900/50 p-4 rounded-xl">✔ Mais agilidade</div>
+        <div class="bg-gray-900/50 p-4 rounded-xl">✔ Menos retrabalho</div>
+    </div>
+</div>
+
+<!-- IMPACTO RELACIONAL -->
+<div class="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-6 mb-8">
+    <h4 class="font-semibold mb-3">🤝 Impacto Relacional</h4>
+    <p class="text-gray-300">
+        Redução de conflitos com as indústrias, fortalecendo a confiança e a qualidade das negociações.
+    </p>
+</div>
+
+<!-- CONCLUSÃO -->
+<div class="bg-green-500/10 border border-green-500/30 rounded-2xl p-6 mb-8">
+    <h4 class="font-semibold mb-3">🧠 Conclusão</h4>
+    <p class="text-gray-300 leading-relaxed">
+        Com processo estruturado e alternativas comerciais, o refaturamento deixa de ser necessário,
+        transformando erros em ajustes controlados, sem impacto no faturamento e na operação.
+    </p>
+</div>  
