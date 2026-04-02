@@ -1,272 +1,108 @@
-<!DOCTYPE html>
-<html lang="pt-BR" class="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estudo Refaturamento NF - Dashboard Executivo</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        /* ================================
-           🎯 SEU CSS INTEGRADO (PERFEITO!)
-        =================================== */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
-        body { 
-            font-family: 'Poppins', 'Inter', sans-serif; 
-            background: linear-gradient(135deg, #0a0a0a 0%, #111827 50%, #0a0a0a 100%);
-            color: #fff;
-            overflow-x: hidden;
-        }
-        
-        /* SEU CSS COMPLETO AQUI (copiado exatamente) */
-        .section-container { max-width: 1280px; margin: 0 auto; padding: 0 16px; }
-        @media (min-width: 1024px) { .section-container { padding: 0 32px; } }
-        
-        .glass { backdrop-filter: blur(12px); background: rgba(255,255,255,0.03); border-radius: 24px; border: 1px solid rgba(255,255,255,0.08); }
-        .gradient-text-yellow { background: linear-gradient(to right, #facc15, #fb923c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .gradient-text-green { background: linear-gradient(to right, #4ade80, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        .card { border-radius: 24px; padding: 24px; backdrop-filter: blur(10px); transition: all 0.3s ease; }
-        .card:hover { transform: translateY(-4px); }
-        .card-yellow { background: linear-gradient(135deg, rgba(234,179,8,0.15), rgba(249,115,22,0.1)); border: 1px solid rgba(234,179,8,0.3); }
-        .card-blue { background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(37,99,235,0.1)); border: 1px solid rgba(59,130,246,0.3); }
-        .card-purple { background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(147,51,234,0.1)); border: 1px solid rgba(168,85,247,0.3); }
-        .card-green { background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(16,185,129,0.1)); border: 1px solid rgba(34,197,94,0.3); }
-        .card-red { background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(127,29,29,0.1)); border: 1px solid rgba(239,68,68,0.3); }
-        
-        .section-header { display: flex; align-items: center; gap: 20px; padding: 24px; border-radius: 24px; backdrop-filter: blur(12px); }
-        .section-icon { width: 64px; height: 64px; border-radius: 16px; display: flex; align-items: center; justify-content: center; }
-        
-        .grid-2 { display: grid; grid-template-columns: 1fr; gap: 24px; }
-        @media (min-width: 1024px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
-        .grid-4 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        @media (min-width: 1024px) { .grid-4 { grid-template-columns: repeat(4, 1fr); } }
-        
-        .text-muted { color: rgba(255,255,255,0.6); }
-        .text-soft { color: rgba(255,255,255,0.8); }
-        .hover-glow:hover { box-shadow: 0 0 25px rgba(255,200,0,0.2); }
-        
-        section { width: 100%; overflow-x: hidden; }
-        .max-safe { max-width: 100%; overflow: hidden; }
-        .chart-content { position: relative; width: 100%; height: 100%; min-height: 0; }
-        .chart-content canvas { width: 100% !important; height: 100% !important; }
-        
-        /* SCROLL INDICATOR */
-        .scroll-indicator-container { position: fixed; top: 0; left: 0; width: 100%; height: 3px; background: rgba(255,255,255,0.1); z-index: 9999; }
-        .scroll-indicator { height: 100%; background: linear-gradient(90deg, #fbbf24, #f59e0b, #ef4444); border-radius: 0 2px 2px 0; transition: width 0.1s ease; }
-        
-        /* SHIMMER LOADING */
-        @keyframes shimmer { 0% { background-position: -468px 0; } 100% { background-position: 468px 0; } }
-        .shimmer { background: linear-gradient(90deg, #111827 25%, #1f2937 50%, #374151 75%, #111827 100%); background-size: 300% 100%; animation: shimmer 2s infinite; }
-    </style>
-    
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: { extend: { fontFamily: { 'sans': ['Poppins', 'Inter', 'sans-serif'] } } }
-        }
-    </script>
-</head>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
 
-<body>
-    <!-- SCROLL INDICATOR -->
-    <div class="scroll-indicator-container">
-        <div class="scroll-indicator" style="width: 0%"></div>
-    </div>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-    <!-- SIDEBAR (sua versão perfeita) -->
-    <div class="fixed inset-y-0 left-0 z-50 w-72 bg-black/80 backdrop-blur-xl border-r border-white/5 shadow-2xl flex flex-col translate-x-[-100%] md:translate-x-0 transition-transform duration-300">
-        <!-- Conteúdo da sidebar igual ao seu original -->
-        <div class="p-6 flex flex-col h-full">
-            <div class="flex items-center space-x-3 mb-8">
-                <div class="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-2xl flex items-center justify-center">
-                    <i class="fas fa-file-invoice-dollar text-2xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold gradient-text-yellow">Estudo Refaturamento</h1>
-                    <p class="text-xs text-muted mt-1">Rede Biz</p>
-                </div>
-            </div>
-            
-            <nav class="space-y-2 flex-1">
-                <a href="#visao-geral" class="flex items-center space-x-3 p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/20 hover:bg-yellow-500/20 transition-all active-nav">
-                    <i class="fas fa-chart-line text-yellow-400"></i><span>Visão Geral</span>
-                </a>
-                <a href="#problema" class="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/5 transition-all">
-                    <i class="fas fa-exclamation-triangle text-red-400"></i><span>Problema</span>
-                </a>
-                <a href="#solucoes" class="flex items-center space-x-3 p-3 rounded-xl hover:bg-white/5 transition-all">
-                    <i class="fas fa-lightbulb text-green-400"></i><span>Soluções</span>
-                </a>
-            </nav>
-            
-            <!-- Seu card do César -->
-            <div class="mt-auto pt-6 border-t border-gray-800/50">
-                <!-- ... seu conteúdo igual ... -->
-            </div>
-        </div>
-    </div>
+html {
+    scroll-behavior: smooth;
+}
 
-    <!-- MOBILE MENU BUTTON -->
-    <button id="mobileMenu" class="md:hidden fixed top-6 left-6 z-60 p-3 bg-black/80 backdrop-blur-xl border border-white/10 rounded-2xl text-white hover:bg-white/10 transition-all">
-        <i class="fas fa-bars text-xl"></i>
-    </button>
+body {
+    font-family: 'Poppins', 'Inter', sans-serif;
+    background: linear-gradient(135deg, #0a0a0a 0%, #111827 50%, #0a0a0a 100%);
+    color: #fff;
+    overflow-x: hidden;
+}
 
-    <!-- MOBILE OVERLAY -->
-    <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden"></div>
+.glass {
+    backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
 
-    <!-- MAIN CONTENT -->
-    <main class="section-container pt-20 md:pl-0 min-h-screen">
-        
-        <!-- HEADER -->
-        <header class="mb-16 flex justify-between items-center flex-wrap gap-4">
-            <div>
-                <h1 class="text-4xl md:text-5xl font-bold gradient-text-yellow mb-2">Estudo Refaturamento NF</h1>
-                <p class="text-soft text-lg">Análise executiva dos últimos 6 meses</p>
-            </div>
-            <div class="flex items-center space-x-3">
-                <button id="pdfBtn" class="p-3 glass hover:bg-orange-500/20 border-orange-500/30 rounded-2xl transition-all">
-                    <i class="fas fa-file-pdf text-orange-400 text-xl"></i>
-                </button>
-                <button id="fullscreenBtn" class="p-3 glass hover:bg-purple-500/20 border-purple-500/30 rounded-2xl transition-all">
-                    <i class="fas fa-expand text-purple-400 text-xl"></i>
-                </button>
-            </div>
-        </header>
+.gradient-text-yellow {
+    background: linear-gradient(to right, #facc15, #fb923c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
 
-        <!-- SEÇÃO 1: VISÃO GERAL -->
-        <section id="visao-geral" class="mb-24">
-            <div class="section-header mb-8 card-purple">
-                <div class="section-icon bg-purple-500/20 border border-purple-500/30">
-                    <i class="fas fa-chart-line text-2xl text-purple-400"></i>
-                </div>
-                <div>
-                    <h2 class="text-3xl font-bold text-white mb-2">Visão Geral</h2>
-                    <p class="text-soft">Análise consolidada dos últimos 6 meses</p>
-                </div>
-            </div>
+.gradient-text-green {
+    background: linear-gradient(to right, #4ade80, #34d399);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
 
-            <!-- KPIs -->
-            <div class="grid-4 mb-12 gap-6">
-                <div class="card card-yellow text-center p-8">
-                    <p class="text-muted text-sm mb-2">Total Refaturado</p>
-                    <div class="text-3xl font-bold gradient-text-yellow mb-1">93 NF</div>
-                </div>
-                <div class="card card-blue text-center p-8">
-                    <p class="text-muted text-sm mb-2">Média Mensal</p>
-                    <div class="text-3xl font-bold text-blue-400 mb-1">15,5 NF</div>
-                </div>
-                <div class="card card-red text-center p-8">
-                    <p class="text-muted text-sm mb-2">Pior Mês</p>
-                    <div class="text-3xl font-bold text-red-400">34 NF</div>
-                    <p class="text-xs text-muted">Out/25</p>
-                </div>
-                <div class="card card-green text-center p-8">
-                    <p class="text-muted text-sm mb-2">Melhor Mês</p>
-                    <div class="text-3xl font-bold text-green-400">3 NF</div>
-                    <p class="text-xs text-muted">Dez/25</p>
-                </div>
-            </div>
+.card {
+    border-radius: 24px;
+    padding: 24px;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
 
-            <!-- GRÁFICOS -->
-            <div class="grid-2 gap-8 mb-12">
-                <div class="card glass h-[400px] p-6">
-                    <h3 class="text-xl font-bold mb-6 gradient-text-yellow">📈 Evolução Temporal</h3>
-                    <div class="chart-content h-[300px]">
-                        <canvas id="refaturamentoChart"></canvas>
-                    </div>
-                </div>
-                <div class="card glass h-[400px] p-6">
-                    <h3 class="text-xl font-bold mb-6 gradient-text-yellow">📊 Distribuição Erros</h3>
-                    <div class="chart-content h-[300px]">
-                        <canvas id="distribuicaoChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </section>
+.card:hover {
+    transform: translateY(-4px);
+}
 
-        <!-- SEÇÃO 2: PROBLEMA -->
-        <section id="problema" class="mb-24">
-            <div class="section-header mb-8 card-red">
-                <div class="section-icon bg-red-500/20 border border-red-500/30">
-                    <i class="fas fa-exclamation-triangle text-2xl text-red-400"></i>
-                </div>
-                <h2 class="text-3xl font-bold text-white">Problema Identificado</h2>
-            </div>
-            
-            <div class="grid-2 gap-8">
-                <div class="card card-red p-8">
-                    <h3 class="text-2xl font-bold mb-6 text-red-400"> Concentração Crítica</h3>
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center">
-                            <span class="font-semibold">Nivea</span>
-                            <span class="text-2xl font-bold text-red-400">46 NF (49,5%)</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="font-semibold">Rede Lucas</span>
-                            <span class="text-xl font-bold text-purple-400">22 NF (24%)</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="card glass p-8">
-                    <h3 class="text-2xl font-bold mb-6 gradient-text-yellow">📊 Causas Principais</h3>
-                    <div class="space-y-4">
-                        <div class="flex justify-between"><span>Pedido incorreto</span><span class="text-red-400 font-bold">50%</span></div>
-                        <div class="flex justify-between"><span>Cadastro errado</span><span class="text-purple-400 font-bold">30%</span></div>
-                        <div class="flex justify-between"><span>Condição pagamento</span><span class="text-blue-400 font-bold">20%</span></div>
-                    </div>
-                </div>
-            </div>
-        </section>
+.card-yellow {
+    background: linear-gradient(135deg, rgba(234, 179, 8, 0.15), rgba(249, 115, 22, 0.1));
+    border: 1px solid rgba(234, 179, 8, 0.3);
+}
 
-        <!-- SEÇÃO 3: SOLUÇÕES -->
-        <section id="solucoes">
-            <div class="section-header mb-8 card-green">
-                <div class="section-icon bg-green-500/20 border border-green-500/30">
-                    <i class="fas fa-lightbulb text-2xl text-green-400"></i>
-                </div>
-                <h2 class="text-3xl font-bold text-white">Soluções Implementadas</h2>
-            </div>
-            
-            <div class="grid-2 gap-8">
-                <div class="card card-green p-8">
-                    <h3 class="text-2xl font-bold mb-6 text-green-400">🚀 Automação Nivea</h3>
-                    <div class="space-y-4 text-lg">
-                        <div>✅ +90% produtividade</div>
-                        <div>✅ 100% menos erros manuais</div>
-                        <div>✅ Elimina 49,5% dos refaturamentos</div>
-                    </div>
-                    <a href="https://simuladornivea.streamlit.app/" target="_blank" 
-                       class="mt-6 inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-xl font-bold transition-all hover:scale-105">
-                        🔗 Acessar Sistema
-                    </a>
-                </div>
-                <div class="card glass p-8">
-                    <h3 class="text-2xl font-bold mb-6 gradient-text-yellow">📉 Resultados Atuais</h3>
-                    <div class="grid-4 gap-4">
-                        <div class="text-center p-4 bg-white/5 rounded-xl"><div class="text-2xl font-bold text-green-400">1</div><span class="text-sm text-muted">NF atual</span></div>
-                        <div class="text-center p-4 bg-white/5 rounded-xl"><div class="text-2xl font-bold text-green-400">-90%</div><span class="text-sm text-muted">Redução</span></div>
-                        <div class="text-center p-4 bg-white/5 rounded-xl"><div class="text-2xl font-bold gradient-text-yellow">0</div><span class="text-sm text-muted">Meta</span></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
+.card-blue {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1));
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
 
-    <script>
-        // SEU JAVASCRIPT ORIGINAL (adaptado)
-        document.addEventListener('DOMContentLoaded', function() {
-            Chart.defaults.color = '#9CA3AF';
-            Chart.defaults.borderColor = 'rgba(75,85,99,0.3)';
-            Chart.defaults.font.family = 'Poppins, Inter';
-            
-            initAll();
-        });
+.card-purple {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(147, 51, 234, 0.1));
+    border: 1px solid rgba(168, 85, 247, 0.3);
+}
 
-        function initAll() {
-            initCharts();
-            initNavigation
+.card-green {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(16, 185, 129, 0.1));
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.card-red {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(127, 29, 29, 0.1));
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* SCROLL INDICATOR */
+.scroll-indicator-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    z-index: 9999;
+}
+
+.scroll-indicator {
+    height: 100%;
+    background: linear-gradient(90deg, #fbbf24, #f59e0b, #ef4444);
+    border-radius: 0 2px 2px 0;
+    transition: width 0.1s ease;
+}
+
+/* SHIMMER LOADING */
+@keyframes shimmer {
+    0% {
+        background-position: -468px 0;
+    }
+
+    100% {
+        background-position: 468px 0;
+    }
+}
+
+.shimmer {
+    background: linear-gradient(90deg, #111827 25%, #1f2937 50%, #374151 75%, #111827 100%);
+    background-size: 300% 100%;
+    animation: shimmer 2s infinite;
+}
