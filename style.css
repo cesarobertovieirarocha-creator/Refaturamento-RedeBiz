@@ -1,0 +1,546 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap');
+
+/* ============================================================
+   RESET & BASE
+============================================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    overflow-x: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ============================================================
+   TIPOGRAFIA — HIERARQUIA DE FONTES
+   h1  → Título Principal da Página (1x por página)
+   h2  → Título da Seção no Header (Estudo Refaturamento de NF)
+   h3  → Título de Seção de Conteúdo (Problema, Análise...)
+   h4  → Subtítulo / Card Title
+   h5  → Micro-título dentro de card
+   p   → Texto de parágrafo
+   small / .text-xs → Labels e metadados
+============================================================ */
+
+/* --- H1: Título único de página (sidebar logo) */
+h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.15rem;
+    /* 18.4px */
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+}
+
+/* --- H2: Título principal do header */
+h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.25rem;
+    /* 36px */
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+}
+
+/* --- H3: Títulos de seção (Visão Geral, Problema, Análise...) */
+h3 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 3rem;
+    /* 48px — maior destaque para os tópicos das seções */
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    margin-bottom: 2.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.07);
+    position: relative;
+}
+
+/* Linha de acento colorida embaixo de cada h3 */
+h3::after {
+    content: '';
+    display: block;
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3.5rem;
+    height: 3px;
+    border-radius: 999px;
+    background: currentColor;
+    opacity: 0.7;
+}
+
+/* Garante que o h1 da sidebar não herda regras de h3 */
+.sidebar-nav h3,
+nav h3 {
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.sidebar-nav h3::after,
+nav h3::after {
+    display: none;
+}
+
+/* --- H4: Subtítulos dentro de cards/blocos */
+h4 {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.05rem;
+    /* ~17px */
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.4;
+}
+
+/* --- H5: Micro-títulos (labels dentro de blocos) */
+h5 {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    /* ~14px */
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    line-height: 1.4;
+}
+
+/* --- Parágrafos */
+p {
+    font-size: 0.9375rem;
+    /* 15px */
+    line-height: 1.7;
+    color: inherit;
+}
+
+/* --- Texto pequeno */
+small,
+.text-label {
+    font-size: 0.75rem;
+    /* 12px */
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+/* ============================================================
+   SISTEMA DE ESPAÇAMENTO
+   Seção principal   → mb-16  (64px)
+   Bloco dentro      → mb-8   (32px)
+   Card interno      → mb-4   (16px)
+   Gap grids         → gap-6  (24px)
+============================================================ */
+
+section {
+    scroll-margin-top: 5rem;
+    margin-bottom: 4rem;
+    /* 64px entre seções */
+}
+
+/* Separador visual entre seções principais */
+section+section {
+    padding-top: 1rem;
+}
+
+/* ============================================================
+   CORES DOS FORNECEDORES
+============================================================ */
+:root {
+    --color-nivea: #003399;
+    /* Azul Royal */
+    --color-cargill: #005F4B;
+    /* Verde Corporativo */
+    --color-bic: #FFD200;
+    /* Amarelo Ouro */
+    --color-reckitt: #E6007E;
+    /* Rosa Magenta */
+    --color-hypera: #002D56;
+    /* Azul Marinho */
+    --color-rayovac: #ED1C24;
+    /* Vermelho Vivo */
+    --color-vestacy: #8A2BE2;
+    /* Roxo Vibrante */
+    --color-outros: #808080;
+    /* Cinza Médio */
+}
+
+/* Cor de texto por fornecedor */
+.text-nivea {
+    color: var(--color-nivea);
+}
+
+.text-cargill {
+    color: var(--color-cargill);
+}
+
+.text-bic {
+    color: var(--color-bic);
+}
+
+.text-reckitt {
+    color: var(--color-reckitt);
+}
+
+.text-hypera {
+    color: var(--color-hypera);
+}
+
+.text-rayovac {
+    color: var(--color-rayovac);
+}
+
+.text-vestacy {
+    color: var(--color-vestacy);
+}
+
+.text-outros {
+    color: var(--color-outros);
+}
+
+/* Badge por fornecedor (pill colorida) */
+.badge-supplier {
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.badge-nivea {
+    background: rgba(0, 51, 153, 0.15);
+    color: var(--color-nivea);
+    border: 1px solid rgba(0, 51, 153, 0.35);
+}
+
+.badge-cargill {
+    background: rgba(0, 95, 75, 0.15);
+    color: var(--color-cargill);
+    border: 1px solid rgba(0, 95, 75, 0.35);
+}
+
+.badge-bic {
+    background: rgba(255, 210, 0, 0.15);
+    color: #a08000;
+    border: 1px solid rgba(255, 210, 0, 0.5);
+}
+
+.badge-reckitt {
+    background: rgba(230, 0, 126, 0.12);
+    color: var(--color-reckitt);
+    border: 1px solid rgba(230, 0, 126, 0.35);
+}
+
+.badge-hypera {
+    background: rgba(0, 45, 86, 0.15);
+    color: var(--color-hypera);
+    border: 1px solid rgba(0, 45, 86, 0.35);
+}
+
+.badge-rayovac {
+    background: rgba(237, 28, 36, 0.12);
+    color: var(--color-rayovac);
+    border: 1px solid rgba(237, 28, 36, 0.35);
+}
+
+.badge-vestacy {
+    background: rgba(138, 43, 226, 0.12);
+    color: var(--color-vestacy);
+    border: 1px solid rgba(138, 43, 226, 0.35);
+}
+
+.badge-outros {
+    background: rgba(128, 128, 128, 0.12);
+    color: var(--color-outros);
+    border: 1px solid rgba(128, 128, 128, 0.3);
+}
+
+/* ============================================================
+   GLASS CARDS
+============================================================ */
+.glass {
+    backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.dark .glass {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+.glass:hover {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.dark .glass:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ============================================================
+   GRADIENTES DE TEXTO
+============================================================ */
+.gradient-text-yellow {
+    background: linear-gradient(to right, #facc15, #fb923c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.gradient-text-green {
+    background: linear-gradient(to right, #4ade80, #34d399);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* ============================================================
+   CARDS PADRÃO
+============================================================ */
+.card {
+    border-radius: 20px;
+    padding: 1.5rem;
+    /* 24px */
+    backdrop-filter: blur(10px);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+.card-yellow {
+    background: linear-gradient(135deg, rgba(234, 179, 8, 0.15), rgba(249, 115, 22, 0.1));
+    border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
+.card-yellow:hover {
+    border-color: rgba(234, 179, 8, 0.6);
+    box-shadow: 0 0 20px rgba(234, 179, 8, 0.2);
+}
+
+.card-blue {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1));
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.card-blue:hover {
+    border-color: rgba(59, 130, 246, 0.6);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+}
+
+.card-purple {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(147, 51, 234, 0.1));
+    border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+.card-purple:hover {
+    border-color: rgba(168, 85, 247, 0.6);
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
+}
+
+.card-green {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(16, 185, 129, 0.1));
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.card-green:hover {
+    border-color: rgba(34, 197, 94, 0.6);
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
+}
+
+.card-red {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(127, 29, 29, 0.1));
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.card-red:hover {
+    border-color: rgba(239, 68, 68, 0.6);
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+}
+
+/* ============================================================
+   SCROLL INDICATOR
+============================================================ */
+.scroll-indicator-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    z-index: 9999;
+}
+
+.scroll-indicator {
+    height: 100%;
+    background: linear-gradient(90deg, #fbbf24, #f59e0b, #ef4444);
+    border-radius: 0 2px 2px 0;
+    transition: width 0.1s ease;
+}
+
+/* ============================================================
+   SHIMMER LOADING
+============================================================ */
+@keyframes shimmer {
+    0% {
+        background-position: -468px 0;
+    }
+
+    100% {
+        background-position: 468px 0;
+    }
+}
+
+.shimmer {
+    background: linear-gradient(90deg, #111827 25%, #1f2937 50%, #374151 75%, #111827 100%);
+    background-size: 300% 100%;
+    animation: shimmer 2s infinite;
+}
+
+/* ============================================================
+   NAVEGAÇÃO ATIVA
+============================================================ */
+.active-nav-purple {
+    background: rgba(168, 85, 247, 0.15);
+    border-color: rgba(168, 85, 247, 0.3);
+    color: #c084fc;
+    font-weight: 600;
+}
+
+.active-nav-purple i {
+    color: #c084fc;
+    transform: scale(1.1);
+    transition: all 0.2s;
+}
+
+.active-nav-red {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #f87171;
+    font-weight: 600;
+}
+
+.active-nav-red i {
+    color: #f87171;
+    transform: scale(1.1);
+    transition: all 0.2s;
+}
+
+.active-nav-blue {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.3);
+    color: #60a5fa;
+    font-weight: 600;
+}
+
+.active-nav-blue i {
+    color: #60a5fa;
+    transform: scale(1.1);
+    transition: all 0.2s;
+}
+
+.active-nav-green {
+    background: rgba(34, 197, 94, 0.15);
+    border-color: rgba(34, 197, 94, 0.3);
+    color: #4ade80;
+    font-weight: 600;
+}
+
+.active-nav-green i {
+    color: #4ade80;
+    transform: scale(1.1);
+    transition: all 0.2s;
+}
+
+.active-nav-orange {
+    background: rgba(249, 115, 22, 0.15);
+    border-color: rgba(249, 115, 22, 0.3);
+    color: #fb923c;
+    font-weight: 600;
+}
+
+.active-nav-orange i {
+    color: #fb923c;
+    transform: scale(1.1);
+    transition: all 0.2s;
+}
+
+/* ============================================================
+   BARRAS DE PROGRESSO POR FORNECEDOR
+============================================================ */
+.progress-bar-nivea {
+    background: var(--color-nivea);
+}
+
+.progress-bar-cargill {
+    background: var(--color-cargill);
+}
+
+.progress-bar-bic {
+    background: var(--color-bic);
+}
+
+.progress-bar-reckitt {
+    background: var(--color-reckitt);
+}
+
+.progress-bar-hypera {
+    background: var(--color-hypera);
+}
+
+.progress-bar-rayovac {
+    background: var(--color-rayovac);
+}
+
+.progress-bar-vestacy {
+    background: var(--color-vestacy);
+}
+
+.progress-bar-outros {
+    background: var(--color-outros);
+}
+
+/* ============================================================
+   DIVISOR DE SEÇÃO
+============================================================ */
+.section-divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1), transparent);
+    margin: 2rem 0;
+}
+
+/* ============================================================
+   UTILIDADES EXTRAS
+============================================================ */
+.font-display {
+    font-family: 'Poppins', sans-serif;
+}
+
+.tracking-tight {
+    letter-spacing: -0.02em;
+}
+
+.leading-snug {
+    line-height: 1.4;
+}
